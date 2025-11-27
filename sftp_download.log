@@ -1,8 +1,8 @@
-﻿========== SFTP DOWNLOAD RUN START: 11/27/2025 09:52:36 ==========
-[2025-11-27 09:52:36] [INFO] Starte SFTP-Download von {az16sftp01.blob.core.windows.net}:22 (/ -> D:\Wagner\incomming)
-[2025-11-27 09:52:37] [INFO] Öffne SFTP-Session...
-[2025-11-27 09:52:37] [INFO] SFTP-Session geöffnet.
-[2025-11-27 09:52:37] [INFO] Starte Download: //* -> D:\Wagner\incomming (mit anschließendem Löschen auf SFTP bei Erfolg)
-[2025-11-27 09:52:38] [INFO] Alle Dateien erfolgreich heruntergeladen und auf SFTP gelöscht.
-[2025-11-27 09:52:38] [DEBUG] Schließe SFTP-Session...
-[2025-11-27 09:52:38] [INFO] SFTP-Download-Script erfolgreich beendet.
+﻿========== SFTP DOWNLOAD RUN START: 11/27/2025 10:07:37 ==========
+[2025-11-27 10:07:37] [INFO] Starte SFTP-Download von {az16sftp01.blob.core.windows.net}:22 (/ -> D:\Wagner\incomming)
+[2025-11-27 10:07:37] [INFO] Öffne SFTP-Session...
+[2025-11-27 10:07:38] [INFO] SFTP-Session geöffnet.
+[2025-11-27 10:07:38] [INFO] Starte Download: //* -> D:\Wagner\incomming (mit anschließendem Löschen auf SFTP bei Erfolg)
+[2025-11-27 10:07:38] [INFO] Alle Dateien erfolgreich heruntergeladen und auf SFTP gelöscht.
+[2025-11-27 10:07:38] [DEBUG] Schließe SFTP-Session...
+[2025-11-27 10:07:38] [INFO] SFTP-Download-Script erfolgreich beendet.
