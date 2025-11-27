@@ -1,8 +1,9 @@
-﻿========== SFTP DOWNLOAD RUN START: 11/27/2025 10:26:45 ==========
-[2025-11-27 10:26:45] [INFO] Starte SFTP-Download von {az16sftp01.blob.core.windows.net}:22 (/ -> D:\Ordering\incomming)
-[2025-11-27 10:26:45] [INFO] Öffne SFTP-Session...
-[2025-11-27 10:26:46] [INFO] SFTP-Session geöffnet.
-[2025-11-27 10:26:46] [INFO] Starte Download: //* -> D:\Ordering\incomming (mit anschließendem Löschen auf SFTP bei Erfolg)
-[2025-11-27 10:26:46] [INFO] Alle Dateien erfolgreich heruntergeladen und auf SFTP gelöscht.
-[2025-11-27 10:26:46] [DEBUG] Schließe SFTP-Session...
-[2025-11-27 10:26:46] [INFO] SFTP-Download-Script erfolgreich beendet.
+﻿========== SFTP DOWNLOAD RUN START: 11/27/2025 10:39:33 ==========
+[2025-11-27 10:39:33] [INFO] Starte SFTP-Download von {az16sftp01.blob.core.windows.net}:22 (/ -> D:\Ordering\incomming)
+[2025-11-27 10:39:33] [DEBUG] SFTP-Passwort erfolgreich aus Secure-Datei geladen.
+[2025-11-27 10:39:33] [INFO] Öffne SFTP-Session...
+[2025-11-27 10:39:33] [INFO] SFTP-Session geöffnet.
+[2025-11-27 10:39:33] [INFO] Starte Download: //* -> D:\Ordering\incomming (mit anschließendem Löschen auf SFTP bei Erfolg)
+[2025-11-27 10:39:33] [INFO] Alle Dateien erfolgreich heruntergeladen und auf SFTP gelöscht.
+[2025-11-27 10:39:33] [DEBUG] Schließe SFTP-Session...
+[2025-11-27 10:39:34] [INFO] SFTP-Download-Script erfolgreich beendet.

@@ -1,0 +1,106 @@
+###############################################
+# Ordering Project - .gitignore
+###############################################
+
+# ---------------------------------------------
+# Sensitive Folders & Files (DO NOT COMMIT)
+# ---------------------------------------------
+
+# Secure credentials folder
+# Make sure no passwords or secure files are pushed!
+secure/
+secure/**
+/secure/
+/**/secure/
+
+# SecureString password file(s)
+*.sec
+
+# Credential backups
+*.key
+*.pem
+*.ppk
+
+# JSON request dumps (if not needed in repo)
+order_requests/
+order_requests/**
+
+# Logs
+*.log
+*.txt.log
+logs/
+*.bak
+*.tmp
+
+# PowerShell transcripts
+*.pstranscript
+
+# ---------------------------------------------
+# System / OS Files
+# ---------------------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Mac
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+
+# ---------------------------------------------
+# IDE / Editor Folders
+# ---------------------------------------------
+.vscode/
+.vscode/*
+.vscode/settings.json
+
+.idea/
+*.code-workspace
+
+# ---------------------------------------------
+# PowerShell Specific
+# ---------------------------------------------
+*.ps1xml
+*.psc1
+*.pssc
+
+# Compiled PowerShell module cache
+*.psm1.cache
+*.psm1.metadata
+
+# ---------------------------------------------
+# WinSCP temp files
+# ---------------------------------------------
+*.tmp
+winscp.log
+
+# ---------------------------------------------
+# Documentation Output
+# ---------------------------------------------
+docs/*.docx
+docs/*.pdf
+*.docx
+*.pdf
+
+# Generated README files
+README_generated.md
+
+# ---------------------------------------------
+# Node / Python / Unused generic tech
+# (in case used for docs or automation)
+# ---------------------------------------------
+node_modules/
+__pycache__/
+
+# ---------------------------------------------
+# Build / Artifact folders
+# ---------------------------------------------
+bin/
+obj/
+out/
+dist/
+temp/
+tmp/

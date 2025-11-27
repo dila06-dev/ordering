@@ -2,9 +2,12 @@
     [string]$SftpHost            = "az16sftp01.blob.core.windows.net",
     [int]   $SftpPort            = 22,
 
-    # Anpassen:
+    # Zugangsdaten
     [string]$SftpUser            = "az16sftp01.wagner.wagner",
-    [string]$SftpPassword        = "b/yYZ8BhZjUcbVwv8/QdS6pjGJgc139q",
+    [string]$SftpPassword        = "",  # optional: direkt per Parameter übergeben
+
+    # Optional: SecureString-Password-Datei (wird verwendet, wenn $SftpPassword leer ist)
+    [string]$SftpPasswordFile    = "D:\Ordering\secure\m.sec",
 
     # Optional: wenn du mit Key arbeiten willst:
     [string]$SshPrivateKeyPath   = "",  # z.B. "C:\Keys\azure_sftp.ppk"
@@ -23,7 +26,7 @@
 )
 
 # ==========================================================
-# Einfache Logging-Funktion (unabhängig von deinem Modul)
+# Einfache Logging-Funktion
 # ==========================================================
 function Write-Log {
     param(
@@ -53,7 +56,9 @@ function Write-Log {
     }
 }
 
+# ==========================================================
 # Log initialisieren
+# ==========================================================
 try {
     "========== SFTP DOWNLOAD RUN START: $(Get-Date) ==========" |
         Out-File -FilePath $LogPath -Encoding utf8 -Force
@@ -64,7 +69,9 @@ catch {
 
 Write-Log "Starte SFTP-Download von {$SftpHost}:$SftpPort ($RemoteDirectory -> $LocalDirectory)" "INFO"
 
-# Lokales Verzeichnis sicherstellen
+# ==========================================================
+# Lokales Zielverzeichnis sicherstellen
+# ==========================================================
 if (-not (Test-Path $LocalDirectory)) {
     try {
         New-Item -Path $LocalDirectory -ItemType Directory -Force | Out-Null
@@ -72,6 +79,36 @@ if (-not (Test-Path $LocalDirectory)) {
     }
     catch {
         Write-Log "Konnte lokales Verzeichnis nicht anlegen: $LocalDirectory - $_" "ERROR"
+        exit 1
+    }
+}
+
+# ==========================================================
+# SFTP-Passwort laden (aus Datei, falls nicht per Parameter übergeben)
+# ==========================================================
+if ([string]::IsNullOrWhiteSpace($SftpPassword)) {
+
+    if ([string]::IsNullOrWhiteSpace($SftpPasswordFile)) {
+        Write-Log "Weder SftpPassword noch SftpPasswordFile gesetzt." "ERROR"
+        exit 1
+    }
+
+    if (-not (Test-Path $SftpPasswordFile)) {
+        Write-Log "Secure Password File nicht gefunden: $SftpPasswordFile" "ERROR"
+        exit 1
+    }
+
+    try {
+        # Datei enthält den per ConvertFrom-SecureString gespeicherten SecureString
+        $securePassword = Get-Content $SftpPasswordFile | ConvertTo-SecureString
+        $bstr           = [Runtime.InteropServices.Marshal]::SecureStringToBSTR($securePassword)
+        $SftpPassword   = [Runtime.InteropServices.Marshal]::PtrToStringUni($bstr)
+        [Runtime.InteropServices.Marshal]::ZeroFreeBSTR($bstr)
+
+        Write-Log "SFTP-Passwort erfolgreich aus Secure-Datei geladen." "DEBUG"
+    }
+    catch {
+        Write-Log "Fehler beim Lesen des SFTP-Passworts aus {$SftpPasswordFile}: $_" "ERROR"
         exit 1
     }
 }
@@ -96,10 +133,10 @@ catch {
 # SFTP-Session aufbauen
 # ==========================================================
 $sessionOptions = New-Object WinSCP.SessionOptions
-$sessionOptions.Protocol = [WinSCP.Protocol]::Sftp
-$sessionOptions.HostName = $SftpHost
+$sessionOptions.Protocol   = [WinSCP.Protocol]::Sftp
+$sessionOptions.HostName   = $SftpHost
 $sessionOptions.PortNumber = $SftpPort
-$sessionOptions.UserName = $SftpUser
+$sessionOptions.UserName   = $SftpUser
 
 if ([string]::IsNullOrWhiteSpace($SshPrivateKeyPath)) {
     # Passwort-Login
@@ -108,13 +145,14 @@ if ([string]::IsNullOrWhiteSpace($SshPrivateKeyPath)) {
 else {
     # Key-Login
     $sessionOptions.SshPrivateKeyPath = $SshPrivateKeyPath
+
     if (-not [string]::IsNullOrWhiteSpace($SftpPassword)) {
-        # Falls Key-passphrase oder Passwort zusätzlich
+        # Optional: Key-Passphrase oder zusätzliches Passwort
         $sessionOptions.Password = $SftpPassword
     }
 }
 
-# Achtung: Für produktiv solltest du hier Fingerprint validieren!
+# Hinweis: Für Produktion solltest du hier den SSH-Fingerprint validieren
 # Für schnellen Start:
 $sessionOptions.GiveUpSecurityAndAcceptAnySshHostKey = $true
 
@@ -127,8 +165,6 @@ try {
 
     # ======================================================
     # Dateien herunterladen und nach Erfolg löschen
-    # GetFiles(remoteMask, localPath, remove, transferOptions)
-    # remove=$true bedeutet: nach erfolgreichem Download vom Server löschen
     # ======================================================
     $transferOptions = New-Object WinSCP.TransferOptions
     $transferOptions.TransferMode = [WinSCP.TransferMode]::Binary
@@ -137,20 +173,20 @@ try {
 
     Write-Log "Starte Download: $remoteMask -> $LocalDirectory (mit anschließendem Löschen auf SFTP bei Erfolg)" "INFO"
 
+    # remove = $true  -> löscht Dateien nach erfolgreichem Download vom SFTP
     $transferResult = $session.GetFiles($remoteMask, "$LocalDirectory\", $true, $transferOptions)
 
-    # Prüft alle Transfers, wirft Exception, wenn etwas fehlgeschlagen ist
+    # Wirft Exception, wenn mindestens ein Transfer fehlgeschlagen ist
     $transferResult.Check()
 
     foreach ($transfer in $transferResult.Transfers) {
-        Write-Log "Erfolgreich geladen & auf SFTP gelöscht: $($transfer.FileName) -> $($transfer.Destination)" "INFO"
+        Write-Log "Erfolgreich geladen und auf SFTP gelöscht: $($transfer.FileName) -> $($transfer.Destination)" "INFO"
     }
 
     Write-Log "Alle Dateien erfolgreich heruntergeladen und auf SFTP gelöscht." "INFO"
 }
 catch {
     Write-Log "Fehler bei SFTP-Download: $_" "ERROR"
-    # Session wird unten im finally geschlossen
     exit 1
 }
 finally {
@@ -161,5 +197,4 @@ finally {
 }
 
 Write-Log "SFTP-Download-Script erfolgreich beendet." "INFO"
-
 exit 0

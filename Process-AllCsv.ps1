@@ -20,6 +20,8 @@
       Version:  1.0
       Datum:    11.20.2025
     =====================================================================================
+
+    Pass: Read-Host -assecurestring | ConvertFrom-SecureString | Out-File D:\Ordering\secure\m.sec
 #>
 
 

@@ -1,4 +1,4 @@
-﻿========== RUN START: 11/27/2025 10:26:46 ==========
-[2025-11-27 10:26:46] [INFO] START: PROCESS_ALL_CSV.ps1
-[2025-11-27 10:26:46] [INFO] CSV-Verzeichnis: D:\Ordering\incomming
-[2025-11-27 10:26:46] [WARN] Keine zu verarbeitenden CSV-Dateien gefunden.
+﻿========== RUN START: 11/27/2025 10:37:37 ==========
+[2025-11-27 10:37:37] [INFO] START: PROCESS_ALL_CSV.ps1
+[2025-11-27 10:37:37] [INFO] CSV-Verzeichnis: D:\Ordering\incomming
+[2025-11-27 10:37:37] [WARN] Keine zu verarbeitenden CSV-Dateien gefunden.
