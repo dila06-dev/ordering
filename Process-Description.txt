@@ -1,0 +1,164 @@
+ORDER IMPORT – FULL PROCESS DESCRIPTION (TXT VERSION)
+
+Symbols replaced for TXT compatibility:
+-- START/END
+-- PROCESS
+-- DECISION
+-- SUBPROCESS
+-- FILE/DATA
+-- LOG
+-- API CALL
+-- ERROR
+-- LOOP
+
+============================================================
+1. MAIN ORCHESTRATION SCRIPT: Process-AllCsv.ps1
+============================================================
+
+-- START PROCESS-ALLCSV.ps1
+
+1) PROCESS: Read script parameters
+   -- CsvDirectory
+   -- ApiBaseUrl
+   -- BearerToken
+   -- UserInterface
+   -- ChannelId
+   -- LogPath
+   -- RequestDumpDirectory
+   -- TestMode / DryRun
+
+2) SUBPROCESS: Import module OrderImport.Common.psm1
+
+3) SUBPROCESS: Run Download-FromSftpAndCleanup.ps1
+   -- Downloads CSV files from SFTP
+   -- Deletes them on SFTP after success
+
+4) PROCESS: Initialize global log
+   -- Initialize-OrderImportLog(LogPath)
+   -- Write-Log "START"
+   -- Write-Log "CSV directory: ..."
+
+5) DECISION: Directory exists?
+   If NO:
+      ERROR: log "Directory missing"
+      EXIT 1
+   If YES:
+      continue
+
+6) PROCESS: Collect CSV files
+   -- Get all *.csv except files starting with "#"
+
+7) DECISION: Any CSV files?
+   If NO:
+      LOG: "No CSV files found"
+      EXIT 0
+   If YES:
+      LOG: number of files
+
+8) LOOP: For each CSV file
+   -- LOG: processing filename
+   -- SUBPROCESS: Call Send-OrderCsv
+   -- If success: rename file to #filename.csv
+   -- If error: log error
+
+9) LOG: "ALL FILES PROCESSED"
+
+-- END PROCESS-ALLCSV.ps1
+
+
+============================================================
+2. CORE ORDER PROCESSING: Send-OrderCsv (inside module)
+============================================================
+
+-- START Send-OrderCsv
+
+1) LOG: Start context (API URL, tables, prefix, modes)
+
+2) DECISION: CSV file exists?
+   If NO:
+      ERROR: log and throw
+   If YES:
+      continue
+
+3) PROCESS: Import CSV rows (semicolon-separated)
+
+4) DECISION: CSV contains data?
+   If NO:
+      ERROR: log and throw
+   If YES:
+      continue
+
+5) PROCESS: Prepare API URLs and HTTP headers
+   -- AddUrl    = /add
+   -- UpdateUrl = /update
+   -- QueryUrl  = /select
+   -- Add headers and auth token
+
+6) PROCESS: Group rows by order_unique_id
+   -- Each group = one order
+   -- hadErrors = false
+
+============================================================
+Order Loop (per order)
+============================================================
+
+7) LOOP: For each order group
+   -- Compute orderId = prefix + CSV ID
+   -- Compute timestamps
+   -- LOG: order context
+
+8) SUBPROCESS: Existence check
+   -- Build SELECT query
+   -- API CALL: Invoke-ApiJson (SELECT)
+   -- Check if order already exists in Header table
+
+9) DECISION: Order exists?
+   If YES:
+      LOG: "Order exists – skip"
+      Skip to next order
+   If NO:
+      Continue to insert
+
+============================================================
+Header + Line Inserts
+============================================================
+
+10) PROCESS: Insert Header
+    -- Build header JSON
+    -- API CALL: POST /add
+    -- headerOk = success?
+
+11) LOOP: Insert Lines
+    For each line:
+       -- Build line JSON
+       -- API CALL: POST /add
+       -- If error: allLinesOk = false; hadErrors = true
+
+============================================================
+Status Update (only if all inserts succeeded)
+============================================================
+
+12) DECISION: headerOk AND allLinesOk?
+    If NO:
+       hadErrors = true
+       skip status update
+
+    If YES:
+       -- PROCESS: Build header status (H350 = " ")
+       -- API CALL: PATCH /update
+       -- PROCESS: Build line status (L240 = " ")
+       -- API CALL: PATCH /update
+
+============================================================
+Finish Send-OrderCsv
+============================================================
+
+13) LOG: Processing finished (log path, dump path)
+
+14) DECISION: hadErrors?
+    If YES:
+       throw "Error processing orders"
+    If NO:
+       success
+
+-- END Send-OrderCsv

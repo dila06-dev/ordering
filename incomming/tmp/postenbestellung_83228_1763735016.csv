@@ -1,0 +1,2 @@
+﻿order_unique_id;order_number;customer_number;article_number;quantity;delivery_date;order_date;delivery_company_name1;delivery_company_name2;delivery_company_name3;delivery_address;delivery_address_misc;delivery_zip_code;delivery_city;delivery_country;delivery_email;delivery_phone;clerk_id;reference2
+83228;L-83228;250608;9120001051;1;03.12.2025;21.11.2025;Wagner eCommerce Group GmbH;Camping Wagner;;Ludwigstr. 43;;63667;Nidda;DE;;06043 4031 – 650;;

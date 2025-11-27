@@ -1,0 +1,6 @@
+order_unique_id;order_number;customer_number;article_number;quantity;delivery_date;order_date;delivery_company_name1;delivery_company_name2;delivery_company_name3;delivery_address;delivery_address_misc;delivery_zip_code;delivery_city;delivery_country;delivery_email
+79996;L-W81179996;250608;9102300076;10;28.11.2025;19.11.2025;Wagner eCommerce Group GmbH;Camping Wagner;;Ludwigstr. 43;;63667;Nidda;DE;;06043 4031 – 650;;
+79996;L-W81179996;250608;9103103926;5;28.11.2025;19.11.2025;Wagner eCommerce Group GmbH;Camping Wagner;;Ludwigstr. 43;;63667;Nidda;DE;;06043 4031 – 650;;
+79996;L-W81179996;250608;9103103928;2;28.11.2025;19.11.2025;Wagner eCommerce Group GmbH;Camping Wagner;;Ludwigstr. 43;;63667;Nidda;DE;;06043 4031 – 650;;
+79996;L-W81179996;250608;9103103931;10;28.11.2025;19.11.2025;Wagner eCommerce Group GmbH;Camping Wagner;;Ludwigstr. 43;;63667;Nidda;DE;;06043 4031 – 650;;
+

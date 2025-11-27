@@ -1,0 +1,4 @@
+﻿========== RUN START: 11/27/2025 09:52:38 ==========
+[2025-11-27 09:52:38] [INFO] START: PROCESS_ALL_CSV.ps1
+[2025-11-27 09:52:38] [INFO] CSV-Verzeichnis: D:\Wagner\incomming
+[2025-11-27 09:52:38] [WARN] Keine zu verarbeitenden CSV-Dateien gefunden.
