@@ -13,10 +13,10 @@
     [string]$RemoteDirectory     = "/",
 
     # Lokales Zielverzeichnis
-    [string]$LocalDirectory      = "D:\Wagner\incomming",
+    [string]$LocalDirectory      = "D:\Ordering\incomming",
 
     # Logfile
-    [string]$LogPath             = "D:\Wagner\sftp_download.log",
+    [string]$LogPath             = "D:\Ordering\sftp_download.log",
 
     # Pfad zur WinSCP .NET-Assembly
     [string]$WinScpNetDllPath    = "C:\Program Files (x86)\WinSCP\WinSCPnet.dll"

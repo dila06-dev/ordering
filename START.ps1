@@ -1,11 +1,11 @@
 ﻿param(
-    [string]$CsvDirectory = "D:\Wagner\incomming",
+    [string]$CsvDirectory = "D:\Ordering\incomming",
     [string]$ApiBaseUrl = "http://localhost:8085/api/ibmi/s105dd7a",
     [string]$BearerToken = "IOwIAdKxAuBvlqzOgR9rr9wCmtX7SRaaxnfDjeVSd46c7b41",
     [string]$UserInterface = "EASYIMPORT",
     [string]$ChannelId = "00025",
-    [string]$LogPath = "D:\Wagner\order_import.log",
-    [string]$RequestDumpDirectory = "D:\Wagner\order_requests"
+    [string]$LogPath = "D:\Ordering\order_import.log",
+    [string]$RequestDumpDirectory = "D:\Ordering\order_requests"
 )
 
 # =====================================================================

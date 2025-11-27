@@ -1,4 +1,4 @@
-﻿# D:\Wagner\OrderImport\OrderImport.Common.psm1
+﻿# D:\Ordering\OrderImport\OrderImport.Common.psm1
 <#
     =====================================================================================
       ORDERIMPORT.COMMON.PS1M
@@ -28,10 +28,10 @@
 
 param(
     # Standard-Logpfad, falls Funktionen keinen expliziten Pfad bekommen
-    [string]$DefaultLogPath = "D:\Wagner\order_import.log",
+    [string]$DefaultLogPath = "D:\Ordering\order_import.log",
 
     # Standard-Verzeichnis für JSON-Dumps von Requests
-    [string]$DefaultRequestDumpDirectory = "D:\Wagner\order_requests"
+    [string]$DefaultRequestDumpDirectory = "D:\Ordering\order_requests"
 )
 
 # ==============================================================================

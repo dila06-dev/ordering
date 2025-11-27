@@ -10,7 +10,7 @@
       4. Logging in zentrale System-Logdatei
 
       Struktur des OrderImport-Projekts:
-        D:\Wagner\OrderImport\
+        D:\Ordering\OrderImport\
             |-- OrderImport.Common.psm1     → Modul: Logging, Helpers, API-Funktionen
             |-- Process-AllCsv.ps1          → Dieses Script (Main Runner)
             |-- Send-OrderCsv.ps1           → Optionaler Wrapper für Einzeldatei
@@ -25,7 +25,7 @@
 
 param(
     # Ordner mit eingehenden CSV-Dateien
-    [string]$CsvDirectory        = "D:\Wagner\incomming",
+    [string]$CsvDirectory        = "D:\Ordering\incomming",
 
     # API-Endpunkt-Basis für IBM i
     [string]$ApiBaseUrl          = "http://localhost:8085/api/ibmi/s105dd7a",
@@ -40,10 +40,10 @@ param(
     [string]$ChannelId           = "00025",
 
     # Globale Logdatei für den gesamten Importprozess
-    [string]$LogPath             = "D:\Wagner\order_import.log",
+    [string]$LogPath             = "D:\Ordering\order_import.log",
 
     # Speicherort für JSON-Dumps aller Requests
-    [string]$RequestDumpDirectory= "D:\Wagner\order_requests",
+    [string]$RequestDumpDirectory= "D:\Ordering\order_requests",
 
     # TestMode: Insert/Update nur simulieren
     [switch]$TestMode,
@@ -58,7 +58,7 @@ param(
 # 1) Import des PowerShell-Moduls (Logging, API-Calls, SEND-LOGIK)
 # =====================================================================================
 
-Import-Module 'D:\Wagner\OrderImport.Common.psm1' -Force
+Import-Module 'D:\Ordering\OrderImport.Common.psm1' -Force
 
 
 # =====================================================================================
