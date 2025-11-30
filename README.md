@@ -49,7 +49,8 @@ flowchart TD
     I --> P[Log all files processed]
     P --> Q([END main process])
 
-
+    END
+flowchart TD
     %% CORE ORDER PROCESSING
     subgraph CORE["Send-OrderCsv core processing"]
         S1([START Send-OrderCsv]) --> S2[Log order context]
