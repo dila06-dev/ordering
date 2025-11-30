@@ -24,8 +24,8 @@ flowchart LR
 
     SFTP[SFTP Server]
     IN[CSV Input Folder]
-    MAIN[Process-AllCsv.ps1<br>Orchestration]
-    CORE[Send-OrderCsv<br>Order Processing]
+    MAIN[Process-AllCsv.ps1 - Orchestration]
+    CORE[Send-OrderCsv - Order Processing]
     API[IBM i REST API Gateway]
     DB[IBM i Order Tables]
     LOG[Logging System]
