@@ -4,207 +4,148 @@
 ![Build Status](https://img.shields.io/badge/Build-GitHub_Actions-green)
 ![Documentation](https://img.shields.io/badge/Docs-Available-brightgreen)
 
-A fully automated, production-ready Order Import System designed to process CSV files, download them from SFTP, transform them, and import structured orders into IBM i (AS/400) systems using REST APIs.
+A fully automated, production-ready **Order Import Pipeline** designed for IBM i (AS/400) environments.  
+It downloads CSV files from SFTP, processes and validates them, transforms them into structured orders, and imports them using REST APIs.
 
-This project contains a complete PowerShell processing pipeline, API integration layer, logging system, SFTP automation, and documentation including diagrams.
+This repository contains:
+
+- PowerShell automation pipeline  
+- IBM i REST API integration  
+- Logging & error handling  
+- SFTP management  
+- Documentation & diagrams  
 
 ---
 
-# Project Structure
+# 📊 Full Order Import Pipeline – High-Level Flow
+
+```mermaid
+flowchart TD
+
+    %% MAIN ORCHESTRATION
+    A([START Process-AllCsv.ps1]) --> B[Read Script Parameters]
+    B --> C[Import OrderImport.Common.psm1 Module]
+    C --> D[Run Download-FromSftpAndCleanup.ps1<br/>(SFTP → Local CSV)]
+    D --> E[Initialize Log]
+
+    E --> F{CSV Directory Exists?}
+    F -- NO --> F_ERR[[❌ ERROR: Directory Missing → EXIT]]
+    F -- YES --> G[Collect CSV Files (excluding #filename.csv)]
+
+    G --> H{Any CSV Files?}
+    H -- NO --> H_LOG[[ℹ️ LOG: No Files → EXIT]]
+    H -- YES --> I[[🔁 LOOP: For Each CSV]]
+
+    I --> J[LOG: Processing Filename]
+    J --> K[Call Send-OrderCsv]
+    K --> L{Success?}
+    L -- YES --> M[Rename to #filename.csv]
+    L -- NO --> N[[❌ ERROR Logged]]
+
+    M --> O((Next File))
+    N --> O
+    O --> I
+
+    I --> P[LOG 'ALL FILES PROCESSED']
+    P --> Q([END Process-AllCsv.ps1])
+
+
+    %% CORE ORDER PROCESSING
+    subgraph CORE["Send-OrderCsv – Core Processing"]
+        S1([START Send-OrderCsv]) --> S2[LOG Order Context]
+
+        S2 --> S3{CSV Exists?}
+        S3 -- NO --> S3_ERR[[❌ Throw: Missing File]]
+        S3 -- YES --> S4[Import CSV Rows]
+
+        S4 --> S5{CSV Contains Data?}
+        S5 -- NO --> S5_ERR[[❌ Throw: CSV Empty]]
+        S5 -- YES --> S6[Prepare API URLs & Headers]
+
+        S6 --> S7[Group Rows by order_unique_id]
+        S7 --> S8[[🔁 LOOP: For Each Order]]
+
+        S8 --> S9[Compute OrderId & Timestamps]
+        S9 --> S10[SELECT Query – Check Existence]
+
+        S10 --> S11{Order Exists?}
+        S11 -- YES --> S11_SKIP[[Skip Order]] --> S8
+        S11 -- NO --> S12[Insert Header /add]
+
+        S12 --> S13[[🔁 Insert Line Items]]
+        S13 --> S14[Insert Line /add]
+        S14 --> S13
+
+        S13 --> S15{Header OK & All Lines OK?}
+        S15 -- NO --> S16[[⚠️ Mark Errors & Skip Status Update]] --> S8
+        S15 -- YES --> S17[PATCH Header Status]
+        S17 --> S18[PATCH Line Status] --> S8
+
+        S8 --> S19[LOG Completion Info]
+        S19 --> S20{Any Errors?}
+        S20 -- YES --> S21[[❌ Throw Error]]
+        S20 -- NO --> S22([SUCCESS])
+    end
+```
+
+---
+
+# 📁 Project Structure
 
 ```
 ordering/
-│
 ├── Process-AllCsv.ps1
 ├── Download-FromSftpAndCleanup.ps1
 ├── OrderImport.Common.psm1
 ├── Send-OrderCsv.ps1
-│
 ├── diagrams/
 │   └── order_import_flow.svg
-│
 └── docs/
     └── Process_Description.docx
 ```
 
 ---
 
-# Architecture Diagram (SVG)
+# 🧱 Architecture Overview
 
-```
-![Order Import Workflow](diagrams/order_import_flow.svg)
-```
+## Main Script – Process-AllCsv.ps1
 
----
+Handles parameter loading, SFTP download, logging, file discovery, and calling **Send-OrderCsv**.
 
-# 1. Main Process – Process-AllCsv.ps1
+## Core Processor – Send-OrderCsv
 
-## 1.1 Startup & Initialization
-
-Start PROCESS-ALLCSV.ps1
-
-Load Parameters:
-- CsvDirectory
-- ApiBaseUrl
-- BearerToken
-- UserInterface
-- ChannelId
-- LogPath
-- RequestDumpDirectory
-- TestMode, DryRun
-
-Import module:
-```
-Import-Module "OrderImport.Common.psm1" -Force
-```
+Validates CSV, groups by order, checks IBM i existence, inserts header + line items, updates statuses.
 
 ---
 
-## 1.2 SFTP Download & Logging
+# 🚀 Developer Quickstart
 
-Execute SFTP download:
-```
-.\Download-FromSftpAndCleanup.ps1
-```
-
-Initialize log:
-```
-Initialize-OrderImportLog -LogPath $LogPath
-Write-Log "START: PROCESS_ALLCSV"
-```
-
----
-
-## 1.3 Directory & File Check
-
-Check whether directory exists.  
-If missing → log error → exit.
-
-Collect CSV files and ignore those starting with '#'.
-
-If no files → log warning → exit.
-
----
-
-## 1.4 Processing Loop
-
-For each CSV file:
-- Log header
-- Determine full path
-- Call Send-OrderCsv
-- If successful → rename to "#filename.csv"
-- On failure → log error, keep original file
-
-End:
-```
-Write-Log "ALL FILES PROCESSED."
-```
-
----
-
-# 2. Order Processing – Send-OrderCsv
-
-## 2.1 Initialization
-
-Check CSV exists.  
-Import rows.  
-If empty → throw.  
-
-Prepare API URLs.  
-Group rows by order_unique_id.
-
----
-
-## 2.2 Per-Order Processing
-
-For each order group:
-
-Compute prefixed ID  
-Generate timestamps  
-Log context  
-
----
-
-# 3. Existence Check
-
-Build SQL:
-```
-SELECT * FROM ORDERH WHERE H050='<orderId>'
-```
-
-API request:
-```
-Invoke-ApiJson -Url $QueryUrl -Body @{ query = $query }
-```
-
-If exists → skip.
-
----
-
-# 4. Inserts
-
-## 4.1 Header Insert
-Build JSON header, POST → /add.
-
-## 4.2 Line Inserts
-Loop through rows, POST → /add.
-
-If any line fails → mark processing as failed.
-
----
-
-# 5. Status Updates (PATCH)
-
-Only if header and all lines were inserted successfully.
-
-Header PATCH:
-```
-Invoke-ApiJson -Method PATCH -Body @{ H350=" " }
-```
-
-Line PATCH:
-```
-Invoke-ApiJson -Method PATCH -Body @{ L240=" " }
-```
-
----
-
-# 6. Completion
-
-Log final status.  
-Throw if any order failed.
-
----
-
-# Developer Quickstart
-
-Clone repository:
-```
+```sh
 git clone https://github.com/<user>/ordering.git
 ```
 
-Run pipeline:
-```
+```powershell
 .\Process-AllCsv.ps1 -CsvDirectory "D:\Wagner\incoming"
 ```
 
 ---
 
-# Contributing
+# 📘 Documentation
 
-See CONTRIBUTING.md.
+Located in:
 
----
-
-# Documentation
-
-Details available in:
 ```
 docs/Process_Description.docx
 ```
 
 ---
 
-# Support
+# 🤝 Contributing
 
-If this project helps you, please consider starring the repository.
+See `CONTRIBUTING.md`.
+
+---
+
+# ⭐ Support
+
+Star the repository if this project helps you!
