@@ -254,11 +254,9 @@ Full process description:
 docs/Process_Description.docx
 ```
 
-Architecture diagrams:
+# 🧭 Architecture Diagram
 
-```
-diagrams/order_import_flow.svg
-```
+![Order Import Workflow](diagrams/order_import_flow.svg)
 
 ---
 
