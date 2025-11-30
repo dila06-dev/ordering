@@ -33,6 +33,7 @@ flowchart LR
     SFTP --> IN --> MAIN --> CORE --> API --> DB
     MAIN --> LOG
     CORE --> LOG
+
 end
 ```
 
@@ -60,6 +61,7 @@ flowchart TD
     NEXT --> LOOP
 
     LOOP --> END([End Process-AllCsv])
+
 end
 ```
 
