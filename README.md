@@ -20,73 +20,45 @@ This repository contains:
 # 📊 Full Order Import Pipeline – High-Level Flow
 
 ```mermaid
+flowchart LR
+
+    SFTP[SFTP Server]
+    IN[CSV Input Folder]
+    MAIN[Process-AllCsv.ps1<br>Orchestration]
+    CORE[Send-OrderCsv<br>Order Processing]
+    API[IBM i REST API Gateway]
+    DB[IBM i Order Tables]
+    LOG[Logging System]
+
+    SFTP --> IN --> MAIN --> CORE --> API --> DB
+    MAIN --> LOG
+    CORE --> LOG
+```
+
+
+# 📊 Top-Level-Logik
+```mermaid
 flowchart TD
 
-    %% MAIN ORCHESTRATION
-    A([START main process]) --> B[Read script parameters]
-    B --> C[Import common module]
-    C --> D[Download files from SFTP]
-    D --> E[Initialize log]
+    START([Start Process-AllCsv]) --> DIR{CSV Directory Exists?}
+    DIR -- NO --> DIR_ERR[Log Error and Exit]
+    DIR -- YES --> SCAN[Scan for CSV Files]
 
-    E --> F{CSV directory exists?}
-    F -- NO --> F_ERR[[Error: directory missing, exit]]
-    F -- YES --> G[Collect CSV files]
+    SCAN --> ANY{Any CSV Files?}
+    ANY -- NO --> EXIT_NOFILES[Log 'No Files' and Exit]
+    ANY -- YES --> LOOP[[Loop: For Each CSV]]
 
-    G --> H{Any CSV files?}
-    H -- NO --> H_LOG[[No files found, exit]]
-    H -- YES --> I[[Loop: for each CSV file]]
+    LOOP --> PROC[Process CSV via Send-OrderCsv]
+    PROC --> RESULT{Success?}
+    RESULT -- YES --> RENAME[Rename to #filename.csv]
+    RESULT -- NO --> LOGERR[Log Error]
 
-    I --> J[Log current file]
-    J --> K[Call Send-OrderCsv]
-    K --> L{Success?}
-    L -- YES --> M[Rename to #filename.csv]
-    L -- NO --> N[[Log error for file]]
+    RENAME --> NEXT((Next File))
+    LOGERR --> NEXT
+    NEXT --> LOOP
 
-    M --> O((Next file))
-    N --> O
-    O --> I
+    LOOP --> END([End Process-AllCsv])
 
-    I --> P[Log all files processed]
-    P --> Q([END main process])
-
-    END
-flowchart TD
-    %% CORE ORDER PROCESSING
-    subgraph CORE["Send-OrderCsv core processing"]
-        S1([START Send-OrderCsv]) --> S2[Log order context]
-
-        S2 --> S3{CSV file exists?}
-        S3 -- NO --> S3_ERR[[Throw: missing file]]
-        S3 -- YES --> S4[Import CSV rows]
-
-        S4 --> S5{CSV has data?}
-        S5 -- NO --> S5_ERR[[Throw: CSV empty]]
-        S5 -- YES --> S6[Prepare API urls and headers]
-
-        S6 --> S7[Group rows by order id]
-        S7 --> S8[[Loop: each order]]
-
-        S8 --> S9[Compute order id and timestamps]
-        S9 --> S10[Run select query]
-
-        S10 --> S11{Order exists?}
-        S11 -- YES --> S11_SKIP[[Skip order]] --> S8
-        S11 -- NO --> S12[Insert header]
-
-        S12 --> S13[[Loop: insert lines]]
-        S13 --> S14[Insert line]
-        S14 --> S13
-
-        S13 --> S15{Header ok and lines ok?}
-        S15 -- NO --> S16[[Mark error and skip status update]] --> S8
-        S15 -- YES --> S17[Patch header status]
-        S17 --> S18[Patch line status] --> S8
-
-        S8 --> S19[Log completion for all orders]
-        S19 --> S20{Any errors?}
-        S20 -- YES --> S21[[Throw processing error]]
-        S20 -- NO --> S22([SUCCESS])
-    end
 ```
 
 ---
