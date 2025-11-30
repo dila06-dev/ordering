@@ -23,70 +23,69 @@ This repository contains:
 flowchart TD
 
     %% MAIN ORCHESTRATION
-    A([START Process-AllCsv.ps1]) --> B[Read Script Parameters]
-    B --> C[Import OrderImport.Common.psm1]
-    C --> D[Run Download-FromSftpAndCleanup.ps1 (SFTP to Local)]
-    D --> E[Initialize Log]
+    A([START main process]) --> B[Read script parameters]
+    B --> C[Import common module]
+    C --> D[Download files from SFTP]
+    D --> E[Initialize log]
 
-    E --> F{CSV Directory Exists?}
-    F -- NO --> F_ERR[[ERROR: Directory Missing - EXIT]]
-    F -- YES --> G[Collect CSV Files]
+    E --> F{CSV directory exists?}
+    F -- NO --> F_ERR[[Error: directory missing, exit]]
+    F -- YES --> G[Collect CSV files]
 
-    G --> H{Any CSV Files?}
-    H -- NO --> H_LOG[[No Files Found - EXIT]]
-    H -- YES --> I[[Loop: For Each CSV]]
+    G --> H{Any CSV files?}
+    H -- NO --> H_LOG[[No files found, exit]]
+    H -- YES --> I[[Loop: for each CSV file]]
 
-    I --> J[Log Processing Filename]
+    I --> J[Log current file]
     J --> K[Call Send-OrderCsv]
     K --> L{Success?}
     L -- YES --> M[Rename to #filename.csv]
-    L -- NO --> N[[Error Logged]]
+    L -- NO --> N[[Log error for file]]
 
-    M --> O((Next File))
+    M --> O((Next file))
     N --> O
     O --> I
 
-    I --> P[Log All Files Processed]
-    P --> Q([END Process-AllCsv.ps1])
+    I --> P[Log all files processed]
+    P --> Q([END main process])
 
 
     %% CORE ORDER PROCESSING
-    subgraph CORE["Send-OrderCsv Core Processing"]
-        S1([START Send-OrderCsv]) --> S2[Log Order Context]
+    subgraph CORE["Send-OrderCsv core processing"]
+        S1([START Send-OrderCsv]) --> S2[Log order context]
 
-        S2 --> S3{CSV Exists?}
-        S3 -- NO --> S3_ERR[[Throw: Missing File]]
-        S3 -- YES --> S4[Import CSV Rows]
+        S2 --> S3{CSV file exists?}
+        S3 -- NO --> S3_ERR[[Throw: missing file]]
+        S3 -- YES --> S4[Import CSV rows]
 
-        S4 --> S5{CSV Has Data?}
-        S5 -- NO --> S5_ERR[[Throw: CSV Empty]]
-        S5 -- YES --> S6[Prepare API URLs and Headers]
+        S4 --> S5{CSV has data?}
+        S5 -- NO --> S5_ERR[[Throw: CSV empty]]
+        S5 -- YES --> S6[Prepare API urls and headers]
 
-        S6 --> S7[Group Rows by Order ID]
-        S7 --> S8[[Loop: Each Order]]
+        S6 --> S7[Group rows by order id]
+        S7 --> S8[[Loop: each order]]
 
-        S8 --> S9[Compute OrderId and Timestamps]
-        S9 --> S10[Run SELECT Query]
+        S8 --> S9[Compute order id and timestamps]
+        S9 --> S10[Run select query]
 
-        S10 --> S11{Order Exists?}
-        S11 -- YES --> S11_SKIP[[Skip Order]] --> S8
-        S11 -- NO --> S12[Insert Header]
+        S10 --> S11{Order exists?}
+        S11 -- YES --> S11_SKIP[[Skip order]] --> S8
+        S11 -- NO --> S12[Insert header]
 
-        S12 --> S13[[Loop: Insert Lines]]
-        S13 --> S14[Insert Line]
+        S12 --> S13[[Loop: insert lines]]
+        S13 --> S14[Insert line]
         S14 --> S13
 
-        S13 --> S15{Header OK AND Lines OK?}
-        S15 -- NO --> S16[[Mark Error - Skip Status]] --> S8
-        S15 -- YES --> S17[PATCH Header Status]
-        S17 --> S18[PATCH Line Status] --> S8
+        S13 --> S15{Header ok and lines ok?}
+        S15 -- NO --> S16[[Mark error and skip status update]] --> S8
+        S15 -- YES --> S17[Patch header status]
+        S17 --> S18[Patch line status] --> S8
 
-        S8 --> S19[Log Completion]
-        S19 --> S20{Any Errors?}
-        S20 -- YES --> S21[[Throw Error]]
+        S8 --> S19[Log completion for all orders]
+        S19 --> S20{Any errors?}
+        S20 -- YES --> S21[[Throw processing error]]
         S20 -- NO --> S22([SUCCESS])
     end
-
 ```
 
 ---
